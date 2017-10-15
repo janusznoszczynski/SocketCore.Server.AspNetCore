@@ -4,12 +4,29 @@ using System.Linq;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.IO;
 
 namespace SocketCore.Server.AspNetCore
 {
     public class RedisConnectionManager : IConnectionManager
     {
-        private static ConnectionMultiplexer _Instance = ConnectionMultiplexer.Connect("localhost");
+        private ConnectionMultiplexer _Instance = null;
+
+
+        public RedisConnectionManager(string configuration, TextWriter log = null)
+        {
+            _Instance = ConnectionMultiplexer.Connect(configuration, log);
+        }
+
+        public RedisConnectionManager(ConfigurationOptions configuration, TextWriter log = null)
+        {
+            _Instance = ConnectionMultiplexer.Connect(configuration, log);
+        }
+
+        public RedisConnectionManager(TextWriter log = null)
+            : this("localhost", log)
+        {
+        }
 
 
         public async Task<object> ConnectAsync(string connectionId, Func<object, Task> callback)
