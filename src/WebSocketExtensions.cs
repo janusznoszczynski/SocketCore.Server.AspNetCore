@@ -24,6 +24,34 @@ namespace SocketCore.Server.AspNetCore
             return webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
         }
 
+        public static Task SendDataAsync(this WebSocket webSocket, object data)
+        {
+            var text = JsonConvert.SerializeObject(new Command("Data", data));
+            var bytes = Encoding.UTF8.GetBytes(text);
+            var buffer = new ArraySegment<Byte>(bytes);
+            return webSocket.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+        }
+
+        public static async Task<Command> RecieveCommandAsync(this WebSocket webSocket)
+        {
+            var text = await webSocket.RecieveTextAsync();
+            var cmd = JsonConvert.DeserializeObject<Command>(text);
+            return cmd;
+        }
+
+        public static async Task<object> RecieveDataAsync(this WebSocket webSocket)
+        {
+            var text = await webSocket.RecieveTextAsync();
+            var cmd = JsonConvert.DeserializeObject<Command>(text);
+            
+            if (cmd.Type == "Data")
+            {
+                return cmd.Data;
+            }
+
+            return null;
+        }
+
         public static async Task<string> RecieveTextAsync(this WebSocket webSocket)
         {
             var buffer = new ArraySegment<Byte>(new Byte[4096]);

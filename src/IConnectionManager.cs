@@ -17,5 +17,6 @@ namespace SocketCore.Server.AspNetCore
         Task RemoveFromGroupAsync(string connectionId, string group);
         
         Task<IEnumerable<string>> GetConnectionsAsync();
+        Task<IEnumerable<string>> GetGroupsAsync();
     }
 }

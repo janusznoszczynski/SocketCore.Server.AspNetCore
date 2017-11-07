@@ -75,6 +75,11 @@ namespace SocketCore.Server.AspNetCore
             return Task.FromResult(_Connections.Keys.AsEnumerable());
         }
 
+        public Task<IEnumerable<string>> GetGroupsAsync()
+        {
+            return Task.FromResult(_Groups.Keys.AsEnumerable());
+        }
+
 
         public Task SendToConnectionsAsync(object data, params string[] connectionIds)
         {

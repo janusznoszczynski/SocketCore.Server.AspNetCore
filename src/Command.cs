@@ -1,6 +1,6 @@
 namespace SocketCore.Server.AspNetCore
 {
-    internal class Command
+    public class Command
     {
         public string Type { get; set; }
         public object Data { get; set; }
