@@ -8258,11 +8258,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\test\\SocketCore.Server.AspNetCore.Tests.csproj",
+      "projectUniqueName": "C:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\test\\SocketCore.Server.AspNetCore.Tests.csproj",
       "projectName": "SocketCore.Server.AspNetCore.Tests",
-      "projectPath": "c:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\test\\SocketCore.Server.AspNetCore.Tests.csproj",
+      "projectPath": "C:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\test\\SocketCore.Server.AspNetCore.Tests.csproj",
       "packagesPath": "C:\\Users\\johnnyno\\.nuget\\packages\\",
-      "outputPath": "c:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\test\\obj\\",
+      "outputPath": "C:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\test\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -8281,8 +8281,8 @@
       "frameworks": {
         "netcoreapp2.0": {
           "projectReferences": {
-            "c:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\src\\SocketCore.Server.AspNetCore.csproj": {
-              "projectPath": "c:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\src\\SocketCore.Server.AspNetCore.csproj"
+            "C:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\src\\SocketCore.Server.AspNetCore.csproj": {
+              "projectPath": "C:\\source\\SocketCore\\SocketCore.Server.AspNetCore\\src\\SocketCore.Server.AspNetCore.csproj"
             }
           }
         }

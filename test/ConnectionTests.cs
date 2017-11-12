@@ -43,9 +43,8 @@ namespace SocketCore.Server.AspNetCore.Tests
         [Fact]
         public async Task LongRunning1()
         {
-            var count = 1;
-
-            var tasks = Enumerable.Range(1, count).Select(i => Recieve("/longrunning"));
+            var count = 500;
+            var tasks = Enumerable.Range(1, count).Select(i => Recieve("/longrunning")).ToArray();
             await Task.WhenAll(tasks);
 
             var connectionIds = tasks.Select(t => t.Result).Distinct().ToArray();

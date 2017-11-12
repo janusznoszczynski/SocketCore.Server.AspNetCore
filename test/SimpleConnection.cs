@@ -5,9 +5,9 @@ namespace SocketCore.Server.AspNetCore.Tests
 {
     public class SimpleConnection : Connection
     {
-        protected override Task OnReceived(string connectionId, object data)
+        protected override async Task OnReceived(string connectionId, object data)
         {
-            return SendToConnectionsAsync($"Reply to: {data}", connectionId);
+            await SendToConnectionsAsync($"Reply to: {data}", connectionId);
         }
     }
 }
