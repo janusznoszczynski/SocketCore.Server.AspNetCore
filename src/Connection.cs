@@ -25,32 +25,32 @@ namespace SocketCore.Server.AspNetCore
         }
 
 
-        protected Task SendToConnectionsAsync(object data, string connectionId)
+        protected internal Task SendToConnectionsAsync(object data, string connectionId)
         {
             return _connectionManager.SendToConnectionsAsync(data, connectionId);
         }
 
-        protected Task SendToGroupsAsync(object data, string group)
+        protected internal Task SendToGroupsAsync(object data, string group)
         {
             return _connectionManager.SendToGroupsAsync(data, group);
         }
 
-        protected Task SendToAllAsync(object data)
+        protected internal Task SendToAllAsync(object data)
         {
             return _connectionManager.SendToAllAsync(data);
         }
 
-        protected Task AddToGroupAsync(string connectionId, string group)
+        protected internal Task AddToGroupAsync(string connectionId, string group)
         {
             return _connectionManager.AddToGroupAsync(connectionId, group);
         }
 
-        protected Task RemoveFromGroupAsync(string connectionId, string group)
+        protected internal Task RemoveFromGroupAsync(string connectionId, string group)
         {
             return _connectionManager.RemoveFromGroupAsync(connectionId, group);
         }
 
-        protected Task<IEnumerable<string>> GetConnectionsAsync()
+        protected internal Task<IEnumerable<string>> GetConnectionsAsync()
         {
             return _connectionManager.GetConnectionsAsync();
         }
