@@ -5,6 +5,7 @@ using StackExchange.Redis;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using SocketCore.Server.AspNetCore.Workflows.Messages;
 
 namespace SocketCore.Server.AspNetCore.Workflows
 {
@@ -69,9 +70,13 @@ namespace SocketCore.Server.AspNetCore.Workflows
 
         public async Task Produce(string channel, Message message)
         {
-            var str = JsonConvert.SerializeObject(message);
-            await _Instance.GetDatabase().ListLeftPushAsync($"{_Prefix}{channel}.queue", str, flags: CommandFlags.FireAndForget);
-            await _Instance.GetSubscriber().PublishAsync(channel, true);
+            if (await _Instance.NUMSUB(channel) > 0)
+            {
+                // Queue message only if any subscriber is waiting for it
+                var str = JsonConvert.SerializeObject(message);
+                await _Instance.GetDatabase().ListLeftPushAsync($"{_Prefix}{channel}.queue", str, flags: CommandFlags.FireAndForget);
+                await _Instance.GetSubscriber().PublishAsync(channel, true);
+            }
         }
 
         public async Task Register(string channel, WorkflowBase workflow)
@@ -82,10 +87,25 @@ namespace SocketCore.Server.AspNetCore.Workflows
 
                 if (!msg.IsNullOrEmpty)
                 {
-                    var message = JsonConvert.DeserializeObject<Message>(msg);
-                    await workflow.ExecuteAsync(message);
+                    try
+                    {
+                        var message = JsonConvert.DeserializeObject<Message>(msg);
+                        await workflow.ExecuteAsync(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        await Produce($"{_Prefix}WokrflowEvents", new OnExceptionMessage(ex));
+                    }
                 }
             });
+        }
+
+        public string Prefix
+        {
+            get
+            {
+                return _Prefix;
+            }
         }
     }
 }

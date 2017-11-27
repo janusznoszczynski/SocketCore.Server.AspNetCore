@@ -25,14 +25,14 @@ namespace SocketCore.Server.AspNetCore
         }
 
 
-        protected internal Task SendToConnectionsAsync(object data, string connectionId)
+        protected internal Task SendToConnectionsAsync(object data, params string[] connectionIds)
         {
-            return _connectionManager.SendToConnectionsAsync(data, connectionId);
+            return _connectionManager.SendToConnectionsAsync(data, connectionIds);
         }
 
-        protected internal Task SendToGroupsAsync(object data, string group)
+        protected internal Task SendToGroupsAsync(object data, params string[] groups)
         {
-            return _connectionManager.SendToGroupsAsync(data, group);
+            return _connectionManager.SendToGroupsAsync(data, groups);
         }
 
         protected internal Task SendToAllAsync(object data)

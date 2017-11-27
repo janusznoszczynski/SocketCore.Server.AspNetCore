@@ -39,15 +39,20 @@ namespace SocketCore.Server.AspNetCore.Tests
 
             var connectionId = cmd.Data.ToString();
 
+            var message = new Message("SimpleNamespace", "SimpleType")
+            {
+                ConnectionId = connectionId
+            };
+
             await ws.SendDataAsync(new
             {
                 Channel = "simple",
-                Message = new Message()
+                Message = message
             });
 
             var data = await ws.RecieveDataAsync();
-            var message = (data as JArray).First().ToObject<Message>();
-            Assert.Equal(connectionId, message.ReplyToMessageId);
+            var reply = (data as JObject).ToObject<Message>();
+            Assert.Equal(connectionId, reply.ReplyToMessageId);
 
             return connectionId;
         }

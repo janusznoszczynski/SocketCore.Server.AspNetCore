@@ -4,11 +4,18 @@ using SocketCore.Server.AspNetCore.Workflows;
 namespace SocketCore.Server.AspNetCore.Tests
 {
     [SubscribeChannel("simple")]
+    [SubscribeWorkflowsEventsChannel]
     public class SimpleWorkflow : WorkflowBase
     {
-        protected override Task ExecuteAsync(Message message)
+        protected override async Task ExecuteAsync(Message message)
         {
-            return Reply(message, new Message());
+            if (message.IsMatch("SimpleNamespace", "SimpleType"))
+            {
+                await ReplyAsync(message, new Message());
+            }
+            else
+            {
+            }
         }
     }
 }

@@ -10,5 +10,6 @@ namespace SocketCore.Server.AspNetCore.Workflows
     {
         Task Produce(string channel, Message message);
         Task Register(string channel, WorkflowBase workflow);
+        string Prefix { get; }
     }
 }

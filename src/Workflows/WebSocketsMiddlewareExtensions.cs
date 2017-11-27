@@ -14,9 +14,10 @@ namespace SocketCore.Server.AspNetCore.Workflows
             builder.UseWebSockets();
 
             var workflowManager = builder.ApplicationServices.GetService(typeof(IWorkflowManager)) as IWorkflowManager;
-            var connection = new Workflows.WorkflowConnection(workflowManager);
+            var connection = new WorkflowConnection(workflowManager);
 
             var workflowBaseType = typeof(WorkflowBase);
+            var subscribeWorkflowsEventsChannelAttributeType = typeof(SubscribeWorkflowsEventsChannelAttribute);
             var subscribeChannelAttributeType = typeof(SubscribeChannelAttribute);
 
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -28,12 +29,19 @@ namespace SocketCore.Server.AspNetCore.Workflows
                 var workflow = (WorkflowBase)Activator.CreateInstance(t);
                 workflow.SetConnection(connection);
                 workflow.SetSenderId(senderId);
-                
-                var attr = (SubscribeChannelAttribute)Attribute.GetCustomAttribute(t, subscribeChannelAttributeType);
 
-                if (attr != null)
+                var attr1 = (SubscribeWorkflowsEventsChannelAttribute)Attribute.GetCustomAttribute(t, subscribeWorkflowsEventsChannelAttributeType);
+
+                if (attr1 != null)
                 {
-                    foreach (var channel in attr.Channels)
+                    await connection.RegisterWorkflow($"{workflowManager.Prefix}WokrflowEvents", workflow);
+                }
+                
+                var attr2 = (SubscribeChannelAttribute)Attribute.GetCustomAttribute(t, subscribeChannelAttributeType);
+
+                if (attr2 != null)
+                {
+                    foreach (var channel in attr2.Channels)
                     {
                        await connection.RegisterWorkflow(channel, workflow);
                     }

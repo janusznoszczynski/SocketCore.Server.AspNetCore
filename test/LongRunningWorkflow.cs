@@ -10,7 +10,7 @@ namespace SocketCore.Server.AspNetCore.Tests
         protected override async Task ExecuteAsync(Message message)
         {
             await Task.Delay(TimeSpan.FromSeconds(10));
-            await Reply(message, new Message());
+            await ReplyAsync(message, new Message());
         }
     }
 }
