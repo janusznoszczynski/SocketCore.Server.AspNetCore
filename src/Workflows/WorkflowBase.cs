@@ -10,6 +10,7 @@ namespace SocketCore.Server.AspNetCore.Workflows
     {
         private WorkflowConnection _Connection = null;
         private string _SenderId = "";
+        private IServiceProvider _ServicesProvider = null;
 
         internal protected abstract Task ExecuteAsync(Message message);
 
@@ -21,6 +22,11 @@ namespace SocketCore.Server.AspNetCore.Workflows
         internal void SetSenderId(string senderId)
         {
             _SenderId = senderId;
+        }
+
+        internal void SetServicesProvider(IServiceProvider servicesProvider)
+        {
+            _ServicesProvider = servicesProvider;
         }
 
         protected Task ReplyAsync(Message message, params Message[] replies)
@@ -70,6 +76,12 @@ namespace SocketCore.Server.AspNetCore.Workflows
         protected internal Task<IEnumerable<string>> GetConnectionsAsync()
         {
             return _Connection.GetConnectionsAsync();
+        }
+
+        protected T Resolve<T>()
+            where T : class
+        {
+            return _ServicesProvider.GetService(typeof(T)) as T;
         }
     }
 }

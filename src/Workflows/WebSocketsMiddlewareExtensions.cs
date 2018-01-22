@@ -4,6 +4,7 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace SocketCore.Server.AspNetCore.Workflows
 {
@@ -26,9 +27,10 @@ namespace SocketCore.Server.AspNetCore.Workflows
 
             Parallel.ForEach(workflowTypes, async t =>
             {
-                var workflow = (WorkflowBase)Activator.CreateInstance(t);
+                var workflow = (WorkflowBase)ActivatorUtilities.CreateInstance(builder.ApplicationServices, t);
                 workflow.SetConnection(connection);
                 workflow.SetSenderId(senderId);
+                workflow.SetServicesProvider(builder.ApplicationServices);
 
                 var attr1 = (SubscribeWorkflowsEventsChannelAttribute)Attribute.GetCustomAttribute(t, subscribeWorkflowsEventsChannelAttributeType);
 
@@ -36,14 +38,14 @@ namespace SocketCore.Server.AspNetCore.Workflows
                 {
                     await connection.RegisterWorkflow($"{workflowManager.Prefix}WokrflowEvents", workflow);
                 }
-                
+
                 var attr2 = (SubscribeChannelAttribute)Attribute.GetCustomAttribute(t, subscribeChannelAttributeType);
 
                 if (attr2 != null)
                 {
                     foreach (var channel in attr2.Channels)
                     {
-                       await connection.RegisterWorkflow(channel, workflow);
+                        await connection.RegisterWorkflow(channel, workflow);
                     }
                 }
             });
