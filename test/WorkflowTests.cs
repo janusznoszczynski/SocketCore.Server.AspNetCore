@@ -1,60 +1,111 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using SocketCore.Server.AspNetCore;
-using System.Linq;
-using System.Net.WebSockets;
-using SocketCore.Server.AspNetCore.Workflows;
 using Newtonsoft.Json.Linq;
+using SocketCore.Server.AspNetCore;
+using SocketCore.Server.AspNetCore.Workflows;
+using Xunit;
 
 namespace SocketCore.Server.AspNetCore.Tests
 {
     public class WorkflowTests
     {
-        private readonly TestServer _server = null;
-        private readonly WebSocketClient _client = null;
-
-        public WorkflowTests()
+        [Theory]
+        [MemberData(nameof(GetServices))]
+        public async Task Simple1(IConnectionManager connectionManager, IWorkflowManager workflowManager)
         {
-            _server = new TestServer(new WebHostBuilder().UseStartup<Startup>());
-            _client = _server.CreateWebSocketClient();
-        }
-
-        [Fact]
-        public Task Simple1()
-        {
-            return Recieve("/workflows");
-        }
-
-        private async Task<string> Recieve(string path)
-        {
-            var ws = await _client.ConnectAsync(new Uri(_server.BaseAddress, path), CancellationToken.None);
-
-            var cmd = await ws.RecieveCommandAsync();
-            Assert.Equal("SetConnectionId", cmd.Type);
-
-            var connectionId = cmd.Data.ToString();
-
-            var message = new Message("SimpleNamespace", "SimpleType")
+            using(var server = BuildTestServer(connectionManager, workflowManager))
             {
-                ConnectionId = connectionId
+                await Recieve("/workflows", "simple", server);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetServices))]
+        public async Task LongRunning1(IConnectionManager connectionManager, IWorkflowManager workflowManager)
+        {
+            var count = 1;
+
+            using(var server = BuildTestServer(connectionManager, workflowManager))
+            {
+                var tasks = Enumerable.Range(1, count).Select(i => Recieve("/workflows", "longrunning", server)).ToArray();
+                await Task.WhenAll(tasks);
+
+                var connectionIds = tasks.Select(t => t.Result).Distinct().ToArray();
+                Assert.Equal(count, connectionIds.Length);
+            }
+        }
+
+        public static IEnumerable<object[]> GetServices()
+        {
+            yield return new object[]
+            {
+                new InProcConnectionManager(),
+                    new InProcWorkflowManager()
             };
 
-            await ws.SendDataAsync(new
+            yield return new object[]
             {
-                Channel = "simple",
-                Message = message
-            });
+                new RedisConnectionManager("localhost", prefix: "WorkflowTests$"),
+                    new RedisWorkflowManager("localhost", prefix: "WorkflowTests$")
+            };
+        }
 
-            var data = await ws.RecieveDataAsync();
-            var reply = (data as JObject).ToObject<Message>();
-            Assert.Equal(connectionId, reply.ReplyToMessageId);
+        private TestServer BuildTestServer<TConnectionManager, TWorkflowManager>(
+            TConnectionManager connectionManager, TWorkflowManager workflowManager)
+        where TConnectionManager : class, IConnectionManager
+        where TWorkflowManager : class, IWorkflowManager
+        {
+            return new TestServer(new WebHostBuilder()
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<IConnectionManager, TConnectionManager>(provider => connectionManager);
+                    services.AddSingleton<IWorkflowManager, TWorkflowManager>(provider => workflowManager);
+                })
+                .Configure(app =>
+                {
+                    app.UseSocketCore("/simple", new SimpleConnection());
+                    app.UseSocketCore("/longrunning", new LongRunningConnection());
 
-            return connectionId;
+                    app.UseSocketCoreWorkflows("/workflows");
+                }));
+        }
+
+        private async Task<string> Recieve(string path, string channel, TestServer server)
+        {
+            var client = server.CreateWebSocketClient();
+
+            using(var ws = await client.ConnectAsync(new Uri(server.BaseAddress, path), CancellationToken.None))
+            {
+                var cmd = await ws.RecieveCommandAsync();
+                Assert.Equal("SetConnectionId", cmd.Type);
+
+                var connectionId = cmd.Data.ToString();
+
+                var message = new Message("SimpleNamespace", "SimpleType")
+                {
+                    ConnectionId = connectionId
+                };
+
+                await ws.SendDataAsync(new
+                {
+                    Channel = channel,
+                        Message = message
+                });
+
+                var data = await ws.RecieveDataAsync();
+                var reply = (data as JObject).ToObject<Message>();
+                Assert.Equal(connectionId, reply.ReplyToMessageId);
+
+                return connectionId;
+            }
         }
     }
 }
