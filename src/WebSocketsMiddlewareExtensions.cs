@@ -1,4 +1,3 @@
-
 using Microsoft.AspNetCore.Builder;
 
 namespace SocketCore.Server.AspNetCore

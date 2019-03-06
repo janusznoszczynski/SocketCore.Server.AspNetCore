@@ -1,11 +1,11 @@
 using System;
-using System.Threading.Tasks;
-using System.Linq;
-using StackExchange.Redis;
-using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SocketCore.Server.AspNetCore.Workflows.Messages;
+using StackExchange.Redis;
 
 namespace SocketCore.Server.AspNetCore.Workflows
 {
@@ -13,7 +13,6 @@ namespace SocketCore.Server.AspNetCore.Workflows
     {
         private readonly string _Prefix = "#";
         private ConnectionMultiplexer _Instance = null;
-
 
         public RedisWorkflowManager(string configuration, TextWriter log = null, string prefix = "#")
         {
@@ -27,21 +26,17 @@ namespace SocketCore.Server.AspNetCore.Workflows
             _Prefix = prefix;
         }
 
-        public RedisWorkflowManager(string configuration, string prefix)
-            : this(configuration, null, prefix)
-        {
-        }
+        public RedisWorkflowManager(string configuration, string prefix) : this(configuration, null, prefix)
+        { }
 
-        public RedisWorkflowManager(TextWriter log = null)
-            : this("localhost", log)
-        {
-        }
+        public RedisWorkflowManager(TextWriter log = null) : this("localhost", log)
+            { }
 
-        ~RedisWorkflowManager()
-        {
-            //free only unmanaged resources
-            Dispose(false);
-        }
+            ~RedisWorkflowManager()
+            {
+                //free only unmanaged resources
+                Dispose(false);
+            }
 
         public void Dispose()
         {
@@ -70,20 +65,30 @@ namespace SocketCore.Server.AspNetCore.Workflows
 
         public async Task Produce(string channel, Message message)
         {
-            if (await _Instance.NUMSUB(channel) > 0)
+            var workflowType = "*";
+            var channelPatternName = $"{_Prefix}{channel}.{workflowType}";
+            var channels =await _Instance.CHANNELS(channelPatternName);
+
+            foreach (var channelName in channels)
             {
-                // Queue message only if any subscriber is waiting for it
-                var str = JsonConvert.SerializeObject(message);
-                await _Instance.GetDatabase().ListLeftPushAsync($"{_Prefix}{channel}.queue", str, flags: CommandFlags.FireAndForget);
-                await _Instance.GetSubscriber().PublishAsync(channel, true);
+                if (await _Instance.NUMSUB(channelName) > 0)
+                {
+                    // Queue message only if any subscriber is waiting for it
+                    var str = JsonConvert.SerializeObject(message);
+                    await _Instance.GetDatabase().ListLeftPushAsync($"{channelName}.queue", str, flags : CommandFlags.FireAndForget);
+                    await _Instance.GetSubscriber().PublishAsync(channelName, true);
+                }
             }
         }
 
         public async Task Register(string channel, WorkflowBase workflow)
         {
-            await _Instance.GetSubscriber().SubscribeAsync(channel, async (chn, status) =>
+            var workflowType = workflow.GetType().FullName;
+            var channelName = $"{_Prefix}{channel}.{workflowType}";
+
+            await _Instance.GetSubscriber().SubscribeAsync(channelName, async(chn, status) =>
             {
-                var msg = await _Instance.GetDatabase().ListRightPopAsync($"{_Prefix}{channel}.queue");
+                var msg = await _Instance.GetDatabase().ListRightPopAsync($"{channelName}.queue");
 
                 if (!msg.IsNullOrEmpty)
                 {

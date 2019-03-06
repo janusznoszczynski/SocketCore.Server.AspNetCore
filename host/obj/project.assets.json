@@ -4561,7 +4561,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "SocketCore.Server.AspNetCore/1.1.1": {
+      "SocketCore.Server.AspNetCore/1.1.2": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v2.0",
         "dependencies": {
@@ -12068,7 +12068,7 @@
         "system.xml.xpath.xdocument.nuspec"
       ]
     },
-    "SocketCore.Server.AspNetCore/1.1.1": {
+    "SocketCore.Server.AspNetCore/1.1.2": {
       "type": "project",
       "path": "../src/SocketCore.Server.AspNetCore.csproj",
       "msbuildProject": "../src/SocketCore.Server.AspNetCore.csproj"
@@ -12078,7 +12078,7 @@
     ".NETCoreApp,Version=v2.1": [
       "Microsoft.AspNetCore.App >= 2.1.1",
       "Microsoft.NETCore.App >= 2.1.0",
-      "SocketCore.Server.AspNetCore >= 1.1.1"
+      "SocketCore.Server.AspNetCore >= 1.1.2"
     ]
   },
   "packageFolders": {
