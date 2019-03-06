@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SocketCore.Server.AspNetCore
 {
@@ -14,7 +14,7 @@ namespace SocketCore.Server.AspNetCore
         public Task<object> ConnectAsync(string connectionId, Func<object, Task> callback)
         {
             _Connections.TryAdd(connectionId, callback);
-            return Task.FromResult((object)null);
+            return Task.FromResult((object) null);
         }
 
         public Task DisconnectAsync(string connectionId, object handle)
@@ -39,6 +39,8 @@ namespace SocketCore.Server.AspNetCore
                 else
                 {
                     handlers = new ConcurrentBag<Func<object, Task>>();
+                    handlers.Add(handler);
+                    _Groups.AddOrUpdate(group, handlers, (a, b) => b);
                 }
             }
             else
@@ -79,7 +81,6 @@ namespace SocketCore.Server.AspNetCore
         {
             return Task.FromResult(_Groups.Keys.AsEnumerable());
         }
-
 
         public Task SendToConnectionsAsync(object data, params string[] connectionIds)
         {

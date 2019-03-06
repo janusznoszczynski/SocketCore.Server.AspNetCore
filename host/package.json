@@ -1,0 +1,24 @@
+{
+  "name": "host",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "private": true,
+  "scripts": {
+    "webpack": "webpack -w",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Janusz Noszczyński <janusz.noszczynski@gmail.com> (https://twitter.com/jnoszczynski)",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "socketcore-client-typescript": "^1.0.8"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.3.22",
+    "ts-loader": "^5.3.1",
+    "typescript": "^3.2.1",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2"
+  }
+}
