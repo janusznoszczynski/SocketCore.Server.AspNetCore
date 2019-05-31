@@ -43,7 +43,7 @@ namespace SocketCore.Server.AspNetCore
         {
             var text = await webSocket.RecieveTextAsync();
             var cmd = JsonConvert.DeserializeObject<Command>(text);
-            
+
             if (cmd.Type == "Data")
             {
                 return cmd.Data;
@@ -54,12 +54,23 @@ namespace SocketCore.Server.AspNetCore
 
         public static async Task<string> RecieveTextAsync(this WebSocket webSocket)
         {
-            var buffer = new ArraySegment<Byte>(new Byte[4096]);
+            var buffer = new ArraySegment<Byte>(new Byte[4096 * 4]);
             var received = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+
+            var sb = new StringBuilder();
 
             if (received.MessageType == WebSocketMessageType.Text)
             {
-                return Encoding.UTF8.GetString(buffer.Array, 0, received.Count);
+                sb.Append(Encoding.UTF8.GetString(buffer.Array, 0, received.Count));
+
+                do
+                {
+                    received = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+                    sb.Append(Encoding.UTF8.GetString(buffer.Array, 0, received.Count));
+                }
+                while (!received.EndOfMessage);
+
+                return sb.ToString();
             }
 
             return null;

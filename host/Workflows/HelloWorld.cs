@@ -11,7 +11,7 @@ namespace host.Workflows
             if (message.IsMatch("HelloWorld", "Greeting"))
             {
                 // await AddToGroupAsync(message.ConnectionId, "all");
-                await SendToConnectionsAsync(new Message("HelloWorld", "Response", "Hello World from: " + message.ConnectionId), message.ConnectionId);
+                await SendToConnectionsAsync(new Message("HelloWorld", "Response", "Hello World from: " + message.Data), message.ConnectionId);
             }
         }
     }
