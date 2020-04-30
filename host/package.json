@@ -11,7 +11,7 @@
   "author": "Janusz Noszczyński <janusz.noszczynski@gmail.com> (https://twitter.com/jnoszczynski)",
   "license": "ISC",
   "dependencies": {
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.0",
     "socketcore-client-typescript": "^1.0.8"
   },
   "devDependencies": {
